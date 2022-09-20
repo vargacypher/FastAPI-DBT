@@ -1,0 +1,29 @@
+FROM --platform=linux/amd64 python:3.9
+RUN apt-get update \
+  && apt-get dist-upgrade -y \
+  && apt-get install -y --no-install-recommends \
+    git \
+    ssh-client \
+    software-properties-common \
+    make \
+    build-essential \
+    ca-certificates \
+    libpq-dev \
+  && apt-get clean \
+  && rm -rf \
+    /var/lib/apt/lists/* \
+    /tmp/* \
+    /var/tmp/*
+
+# Env vars
+ENV PYTHONIOENCODING=utf-8
+ENV LANG=C.UTF-8
+
+# Set docker basics
+COPY . /usr/app/dbt
+WORKDIR /usr/app/dbt/
+RUN pip3 install -r requirements.txt
+ONBUILD dbt init dbt_project -s
+ONBUILD dbt docs generate
+
+

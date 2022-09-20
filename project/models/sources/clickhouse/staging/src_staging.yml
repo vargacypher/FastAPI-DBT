@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: "{{ var('database') }}"
+    tables:
+      - name: CONTACTS_STAGING
+        columns:
+          - name: GENDER
+            tests :
+              - accepted_values:
+                  values: ['M','F','O']

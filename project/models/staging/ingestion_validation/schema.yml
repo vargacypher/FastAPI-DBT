@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: contatcs_validation
+    # description: <markdown_string>
+    # docs:
+    #   show: true | false
+    # config:
+    #   <model_config>: <config_value>
+    # tests:
+    #   - <test>
+    #   - ... # declare additional tests
+    columns:
+      - name: PERCENT_DIFF # required
+        # description: <markdown_string>
+        # meta: {<dictionary>}
+        # quote: true | false
+        tests:
+          - test_threshold_validation:
+              config:
+                severity: warn
+        #   - ... # declare additional tests
+  #      tags: [<string>]

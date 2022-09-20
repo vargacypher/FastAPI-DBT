@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: prod
+    schema: "{{ var('database') }}"
+    tables:
+      - name: APP_ACTIONS
+      - name: APP_CAMPAIGNS
+      - name: APP_FOLLOWUP
+      - name: APP_SUGGESTIONS
+      - name: CONTACTS
+      - name: APP_SCHEDULE
+        # columns:
+        #   - name: GENDER
+        #   - tests :
+        #       - accepted_values:
+        #           values: ['M','F','O']
+      - name: IMPORT_LOG
+      - name: ORDERS
+      - name: ORDER_ITEMS
+      - name: STORE_DETAIL
+      - name: PRODUCTS
+      - name: PIDS
+  - name: system
+    schema: system
+    tables:
+      - name: tables

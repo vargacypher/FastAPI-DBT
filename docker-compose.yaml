@@ -1,0 +1,72 @@
+version: '3.4'
+services:
+  dbt_server:
+    build: 
+      context: "."
+      dockerfile: "./dockerfiles/DBT"
+    network_mode: host # utilizado somente por conta do ssh forwading do clickhouse
+    hostname: dbt_server
+    volumes:
+      - .:/usr/app/dbt/
+      - ./project/profiles.yml:/root/.dbt/profiles.yml
+    command: "gunicorn main:app -b 0.0.0.0:8000 -w 4 --worker-class uvicorn.workers.UvicornWorker --reload --chdir server/ --threads=3 --timeout 360 "
+    working_dir: /usr/app/dbt/
+    ports:
+      - "8000"
+    depends_on:
+      - redis
+
+  dbt_docs:
+    build: 
+      context: "."
+      dockerfile: "./dockerfiles/DBT"
+    network_mode: host
+    hostname: dbt_docs
+    volumes:
+      - .:/usr/app/dbt/
+      - ./project/profiles.yml:/root/.dbt/profiles.yml
+    command: > 
+      sh -c "dbt docs generate --vars '{database: teste, profile: general, dates: false}' --project-dir project/ && 
+            dbt docs serve --vars '{database: teste, profile: general, dates: false}' --project-dir project/ --port 5000"    
+    working_dir: /usr/app/dbt/
+    ports:
+      - "5000"
+
+  redis:
+    container_name: redis
+    network_mode: host
+    hostname: redis
+    image: redis:latest
+    command: --port 6379
+    ports:
+        - "6379:6379"
+    expose:
+        - "6379"
+    restart: always
+
+  redis-worker:
+    container_name: redis-worker
+    network_mode: host
+    build:
+      context: "."
+      dockerfile: "./dockerfiles/DBT"
+    depends_on:
+      - redis
+    volumes:
+      - .:/usr/app/dbt/
+      - ./project/profiles.yml:/root/.dbt/profiles.yml
+
+    working_dir: /usr/app/dbt/server/
+    command: rq worker --url redis://localhost:6379 -P .
+
+  nginx:
+    image: nginx
+    hostname: nginx
+    network_mode: host
+    volumes:
+      - ./nginx:/etc/nginx
+    depends_on:
+      - dbt_server
+      - dbt_docs
+    ports:
+      - "80:80" 

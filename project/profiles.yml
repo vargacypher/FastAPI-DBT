@@ -1,0 +1,22 @@
+config:
+  fail_fast: true
+general:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      schema: "{{ var('database') }}"
+      host: "{{ var('host','localhost') }}"
+      port: "{{ var('port',9000) }}"
+      user: "{{ var('user','default') }}"
+      password: "{{ var('password','') }}"
+final-insights:
+  target: dev
+  outputs:
+    dev:
+      type: clickhouse
+      schema: insights # FIXED DATABASE
+      host: "{{ var('host','localhost') }}"
+      port: "{{ var('port',9000) }}"
+      user: "{{ var('user','default') }}"
+      password: "{{ var('password','') }}"

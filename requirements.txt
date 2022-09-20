@@ -1,0 +1,12 @@
+dbt-clickhouse==1.2.1
+pydantic
+fastapi
+gunicorn 
+uvicorn 
+authlib 
+httpx 
+itsdangerous 
+python-jose 
+redis 
+rq 
+asgi-csrf 

@@ -1,0 +1,8 @@
+env
+venv/*
+logs
+.profiles.yml
+server/__pycache__
+__pycache__
+server/docs/__pycache__
+server/.env

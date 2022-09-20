@@ -1,0 +1,52 @@
+image: python:3.9
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+test: 
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - exists:
+      - manifest.json
+  before_script:
+    - pip3 install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip3 install -r requirements.txt
+    - echo $database
+    - export DATABASE=$database
+    - echo $DATABASE
+  script:
+    - echo 'Copy profiles to .dbt '
+    - cd project
+    - mkdir -p /home/gitlab-runner/.dbt
+    - cp profiles.yml /home/gitlab-runner/.dbt/profiles.yml
+    - echo 'Testing Dbt configurations files'
+    - dbt debug --vars '{"database":'$DATABASE',"dates":"false"}' #test models with a test database
+
+deploy:
+  rules: # When the first if matches -> add job always, in all other cases -> add the job manual
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
+    - when: manual
+    - exists:
+      - manifest.json
+  before_script:
+    - pip3 install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip3 install -r requirements.txt
+    - echo $database
+    - export DATABASE=$database
+    - echo $DATABASE
+  script:
+    - echo 'Copy profiles to .dbt '
+    - cd project
+    - mkdir -p /home/gitlab-runner/.dbt
+    - cp profiles.yml /home/gitlab-runner/.dbt/profiles.yml
+    - echo 'Testing modified dbt models on selected database'
+    - dbt run --models state:modified --vars '{"database":'$DATABASE',"dates":"false"}' --state .    #just modified models (manifest.json)
+    - dbt test --models state:modified --vars '{"database":'$DATABASE',"dates":"false"}' --state . 
+
